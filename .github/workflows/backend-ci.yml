@@ -7,7 +7,7 @@ on:
       - main
 
 jobs:
-  Linting:
+  lint:
     runs-on: ubuntu-latest
     environment: Devlopmnet Environment
 
@@ -30,7 +30,7 @@ jobs:
     - name: Checkout Run Lint
       run: cd starter/backend && pipenv run lint
 
-  Test:
+  test:
     runs-on: ubuntu-latest
 
     steps:
@@ -54,7 +54,7 @@ jobs:
 
       
   Build:
-    needs: [Linting, Test]
+    needs: [lint, test]
     runs-on: ubuntu-latest
     
     steps:
