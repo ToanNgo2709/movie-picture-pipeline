@@ -60,7 +60,7 @@ jobs:
       run: pipenv run test
 
       
-  Build:
+  build:
     needs: [lint, test]
     runs-on: ubuntu-latest
     

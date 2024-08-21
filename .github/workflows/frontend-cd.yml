@@ -54,7 +54,7 @@ jobs:
 
 
 
-  Build:
+  build:
     needs: [lint, test]
     runs-on: ubuntu-latest
     

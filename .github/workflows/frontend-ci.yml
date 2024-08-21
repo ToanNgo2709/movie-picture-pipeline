@@ -52,7 +52,7 @@ jobs:
       working-directory: starter/frontend
       run: npm run test
       
-  Build:
+  build:
     needs: [lint, test]
     runs-on: ubuntu-latest
     
