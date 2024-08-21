@@ -7,9 +7,9 @@ on:
       - main
 
 jobs:
-  Linting:
+  lint:
     runs-on: ubuntu-latest
-    environment: Devlopmnet Environment
+    environment: Devenv
 
     steps:
     - name: Check the Repository
@@ -26,10 +26,11 @@ jobs:
       working-directory: starter/frontend
       run: npm ci
 
-    - name: Checkout Run Lint
-      run: cd starter/frontend && npm run lint
+    - name: Run Lint
+      working-directory: starter/frontend
+      run: npm run lint
 
-  Test:
+  test:
     runs-on: ubuntu-latest
 
     steps:
@@ -47,13 +48,14 @@ jobs:
       working-directory: starter/frontend
       run: npm ci
   
-    - name: Test
-      run: cd starter/frontend && npm run test
+    - name: Run Test
+      working-directory: starter/frontend
+      run: npm run test
 
 
 
   Build:
-    needs: [Linting, Test]
+    needs: [lint, test]
     runs-on: ubuntu-latest
     
     steps:
@@ -76,11 +78,9 @@ jobs:
         aws-region: us-east-1
   
 
-    - name: Login to Amazon 
+    - name: Login to AWS 
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v2
-
-
 
     - name: Build and Push Docker Image
       working-directory: starter/frontend
@@ -91,13 +91,11 @@ jobs:
         docker build --build-arg=REACT_APP_MOVIE_API_URL=http://localhost:5000 --tag 373894711056.dkr.ecr.us-east-1.amazonaws.com/$REPO_NAME:$IMAGE_TAG .
         docker push 373894711056.dkr.ecr.us-east-1.amazonaws.com/$REPO_NAME:$IMAGE_TAG
     
-
     - name: Configure Kubeconfig
-      run:
-       aws eks update-kubeconfig --name cluster --region us-east-1
+      run: |
+        aws eks update-kubeconfig --name cluster --region us-east-1
 
-
-    - name: Deploy Docker Image to Amazon EKS
+    - name: Deploy Docker Image to AWS EKS
       working-directory: starter/frontend/k8s
       env:
         IMAGE_TAG: latest
