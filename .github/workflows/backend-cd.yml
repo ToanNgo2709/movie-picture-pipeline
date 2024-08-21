@@ -7,38 +7,16 @@ on:
       - main
 
 jobs:
-  Linting:
+  lint:
     runs-on: ubuntu-latest
-    environment: Devlopmnet Environment
+    environment: Devenv
 
     steps:
     - name: Check the Repository
       uses: actions/checkout@v3
 
-    - name: Setup Python
+    - name: Set up Python
       uses: actions/setup-python@v4
-      with:
-        python-version: "3.10"
-
-    - name: Install Rependencies
-      working-directory: starter/backend 
-      run:  |
-        python -m pip install --upgrade pip
-        pip install pipenv
-        pip install flake8
-
-    - name: Checkout Run Lint
-      run: cd starter/backend && pipenv run lint
-
-  Test:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Check the Repository
-      uses: actions/checkout@v3
-
-    - name: Use Python 3
-      uses:  actions/setup-python@v4
       with:
         python-version: "3.10"
 
@@ -49,19 +27,45 @@ jobs:
         pip install pipenv
         pip install flake8
 
-    - name: Test
-      run: cd starter/backend && pipenv install pytest && pipenv run test
+    - name: Run Lint
+      working-directory: starter/backend
+      run: pipenv run lint
+
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check the Repository
+      uses: actions/checkout@v3
+
+    - name: Use Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+
+    - name: Install Dependencies
+      working-directory: starter/backend 
+      run:  |
+        python -m pip install --upgrade pip
+        pip install pipenv
+        pip install flake8
+
+    - name: Install Python Test Dependencies
+      working-directory: starter/backend 
+      run: pipenv install pytest && pipenv run test
+
+    - name: Run test
+      working-directory: starter/backend 
+      run: pipenv run test
 
       
   Build:
-    needs: [Linting, Test]
+    needs: [lint, test]
     runs-on: ubuntu-latest
     
     steps:
     - name: Check the Repository
       uses: actions/checkout@v3
-
-
 
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v2
@@ -83,6 +87,7 @@ jobs:
       run: |
         docker build --build-arg=REACT_APP_MOVIE_API_URL=http://localhost:5000 --tag 373894711056.dkr.ecr.us-east-1.amazonaws.com/$REPO_NAME:$IMAGE_TAG .
         docker push 373894711056.dkr.ecr.us-east-1.amazonaws.com/$REPO_NAME:$IMAGE_TAG
+        
     - name: Update Kubeconfig
       run:
        aws eks update-kubeconfig --name cluster --region us-east-1
