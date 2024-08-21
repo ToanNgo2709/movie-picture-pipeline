@@ -9,7 +9,7 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
-    environment: Devlopmnet Environment
+    environment: Devenv
 
     steps:
     - name: Check the Repository
@@ -27,8 +27,9 @@ jobs:
         pip install pipenv
         pip install flake8
 
-    - name: Checkout Run Lint
-      run: cd starter/backend && pipenv run lint
+    - name: Run Lint
+      working-directory: starter/backend
+      run: pipenv run lint
 
   test:
     runs-on: ubuntu-latest
@@ -48,9 +49,13 @@ jobs:
         python -m pip install --upgrade pip
         pip install pipenv
         pip install flake8
+    
+    - name: Install Test Dependencies
+      working-directory: starter/backend
+      run: pipenv install pytest
 
-    - name: Test
-      run: cd starter/backend && pipenv install pytest && pipenv run test
+    - name: Run Test
+      run: pipenv run test
 
       
   Build:
@@ -62,8 +67,8 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Build Docker Image
+      working-directory: starter/backend
       run: |
-        cd starter/backend
         docker build --tag mp-backend:latest .
 
 
